@@ -1,0 +1,103 @@
+date_start_assay	date_end_assay	replicate	group_number	student_1	student_2	timepoint	blue_strain	white_strain	dictyCulture	predationYN	num_blue_colonies	num_white_colonies
+2026-01-21	2026-01-28	1	Group 5	Limwanich	Wetzel	t0	ancB	evPop9	2D	no	impossible to count	impossible to count
+2026-01-21	2026-01-28	1	Group 5	Limwanich	Wetzel	t0	ancB	ancW	2D	no	54	53
+2026-01-21	2026-01-28	1	Group 3	Khan	Nguyen	t0	ancB	ancW	2D	no	impossible to count	impossible to count
+2026-01-21	2026-01-28	1	Group 3	Khan	Nguyen	t0	ancB	evPop6	2D	no	36	8
+2026-01-21	2026-01-28	1	Group 6	Fajarillo	Paslavsky	t0	ancB	evPop11	2D	no	1	18
+2026-01-21	2026-01-28	1	Group 6	Fajarillo	Paslavsky	t0	ancB	ancW	2D	no	too diluted no colony formation	too diluted no colony formation
+2026-01-21	2026-01-28	1	Group 2	Anderson	Uderski	t0	ancB	evPop4	2D	no	16	12
+2026-01-21	2026-01-28	1	Group 2	Anderson	Uderski	t0	ancB	ancW	2D	no	47	72
+2026-01-21	2026-01-28	1	Group 4	Alcaraz-Baez	Carroll	t0	ancB	ancW	2D	no	105	57
+2026-01-21	2026-01-28	1	Group 4	Alcaraz-Baez	Carroll	t0	ancB	evPop7	2D	no	44	1
+2026-01-21	2026-01-28	1	Group 6	Fajarillo	Paslavsky	t6	ancB	evPop11	2D	yes	24	17
+2026-01-21	2026-01-28	1	Group 6	Fajarillo	Paslavsky	t6	ancB	ancW	2D	yes	98	91
+2026-01-21	2026-01-28	1	Group 2	Anderson	Uderski	t6	ancB	ancW	2D	yes	29	52
+2026-01-21	2026-01-28	1	Group 2	Anderson	Uderski	t6	ancB	ancW	2D	no	37	33
+2026-01-21	2026-01-28	1	Group 2	Anderson	Uderski	t6	ancB	evPop3	2D	yes	29	14
+2026-01-21	2026-01-28	1	Group 2	Anderson	Uderski	t6	ancB	evPop3	2D	no	56	68
+2026-01-21	2026-01-28	1	Group 3	Khan	Nguyen	t6	ancB	ancW	2D	yes	Too dense to count	Too dense to count
+2026-01-21	2026-01-28	1	Group 3	Khan	Nguyen	t6	ancB	ancW	2D	no	Too dense to count	Too dense to count
+2026-01-21	2026-01-28	1	Group 3	Khan	Nguyen	t6	ancB	evPop6	2D	yes	Too dense to count	Too dense to count
+2026-01-21	2026-01-28	1	Group 3	Khan	Nguyen	t6	ancB	evPop6	2D	no	Too dense to count	Too dense to count
+2026-01-21	2026-01-28	1	Group 1	Hsu	Kanzler	t0	ancB	evPop2	2D	no	127	42
+2026-01-21	2026-01-28	1	Group 1	Hsu	Kanzler	t0	ancB	ancW	2D	no	58	29
+2026-02-04	2026-02-11	2	Group 6	Fajarillo	Paslavsky	t0	ancB	ancW	3D	no	53	74
+2026-02-04	2026-02-11	2	Group 6	Fajarillo	Paslavsky	t0	ancB	evPop11	3D	no	36	21
+2026-02-04	2026-02-11	2	Group 6	Fajarillo	Paslavsky	t6	ancB	ancW	3D	yes	no formation	no formation
+2026-02-04	2026-02-11	2	Group 6	Fajarillo	Paslavsky	t6	ancB	evPop11	3D	yes	27	9
+2026-02-04	2026-02-11	2	Group 3	Khan	Nguyen	t0	ancB	ancW	3D	no	29	31
+2026-02-04	2026-02-11	2	Group 3	Khan	Nguyen	t0	ancB	evPop6	3D	no	205	105
+2026-02-04	2026-02-11	2	Group 2	Anderson	Uderski	t0	ancB	ancW	3D	no	54	44
+2026-02-04	2026-02-11	2	Group 2	Anderson	Uderski	t0	ancB	evPop4	3D	no	30	18
+2026-02-04	2026-02-11	2	Group 3	Khan	Nguyen	t6	ancB	ancW	3D	yes	52	46
+2026-02-04	2026-02-11	2	Group 3	Khan	Nguyen	t6	ancB	ancW	3D	no	50	54
+2026-02-04	2026-02-11	2	Group 3	Khan	Nguyen	t6	ancB	evPop6	3D	yes	47	36
+2026-02-04	2026-02-11	2	Group 3	Khan	Nguyen	t6	ancB	evPop6	3D	no	4	2
+2026-02-04	2026-02-11	2	Group 2	Anderson	Uderski	t6	ancB	ancW	3D	no	96	106
+2026-02-04	2026-02-11	2	Group 2	Anderson	Uderski	t6	ancB	ancW	3D	yes	65	60
+2026-02-04	2026-02-11	2	Group 2	Anderson	Uderski	t6	ancB	evPop4	3D	no	104	116
+2026-02-04	2026-02-11	2	Group 2	Anderson	Uderski	t6	ancB	evPop4	3D	yes	80	71
+2026-02-04	2026-02-11	2	Group 1	Hsu	Kanzler	t0	ancB	evPop1	3D	no	103	61
+2026-02-04	2026-02-11	2	Group 1	Hsu	Kanzler	t0	ancB	evPop2	3D	no	75	26
+2026-02-04	2026-02-11	2	Group 1	Hsu	Kanzler	t0	ancB	ancW	3D	no	64	57
+2026-02-04	2026-02-11	2	Group 5	Wetzel	Limwanich	t0	ancB	ancW	3D	no	79	57
+2026-02-04	2026-02-11	2	Group 5	Wetzel	Limwanich	t0	ancB	evPop9	3D	no	6	0
+2026-02-04	2026-02-11	2	Group 5	Wetzel	Limwanich	t6	ancB	ancW	3D	no	85	53
+2026-02-04	2026-02-11	2	Group 5	Wetzel	Limwanich	t6	ancB	ancW	3D	yes	too dense to count 	too dense to count 
+2026-02-04	2026-02-11	2	Group 5	Wetzel	Limwanich	t6	ancB	evPop9	3D	no	98	13
+2026-02-04	2026-02-11	2	Group 5	Wetzel	Limwanich	t6	ancB	evPop9	3D	yes	61	1
+2026-01-28	2026-02-04	2B	Group 3	Nguyen	Khan	t0	ancB	ancW		no	44	56
+2026-01-28	2026-02-04	2B	Group 3	Nguyen	Khan	t0	ancB	evPop5		no	58	126
+2026-01-28	2026-02-04	2B	Group 3	Nguyen	Khan	t6	ancB	ancW		yes	170	152
+2026-01-28	2026-02-04	2B	Group 3	Nguyen	Khan	t6	ancB	evPop5		yes	68	73
+2026-01-28	2026-02-04	2B	Group 3	Nguyen	Khan	t6	ancB	ancW		no	33	30
+2026-01-28	2026-02-04	2B	Group 3	Nguyen	Khan	t6	ancB	evPop5		no	12	14
+2026-02-11	2026-02-18	3	Group 6	Paslavsky	Fajarillo	t0	ancB	ancW	4D	no	11	0
+2026-02-11	2026-02-18	3	Group 6	Paslavsky	Fajarillo	t0	ancB	evPop12	4D	no	uncountable	4
+2026-02-11	2026-02-18	3	Group 3	Khan	Nguyen	t0	ancB	ancW	4D	no	69	66
+2026-02-11	2026-02-18	3	Group 3	Nguyen	Khan	t0	ancB	evPop5	4D	no	98	74
+2026-02-11	2026-02-18	3	Group 1	Hsu	Kanzler	t0	ancB	evPop1	4D	no	11	2
+2026-02-11	2026-02-18	3	Group 1	Hsu	Kanzler	t0	ancB	evPop2	4D	no	10	1
+2026-02-11	2026-02-18	3	Group 1	Hsu	Kanzler	t0	ancB	ancW	4D	no	20	12
+2026-02-11	2026-02-18	3	Group 5	Limwanich	Wetzel	t0	ancB	evPop10	4D	no	160	100
+2026-02-11	2026-02-18	3	Group 5	Limwanich	Wetzel	t0	ancB	ancW	4D	no	138	104
+2026-02-11	2026-02-18	3	Group 3	Khan	Nguyen	t6	ancB	evPop5	4D	yes	36	15
+2026-02-11	2026-02-18	3	Group 3	Khan	Nguyen	t6	ancB	evPop5	4D	no	15	12
+2026-02-11	2026-02-18	3	Group 3	Khan	Nguyen	t6	ancB	ancW	4D	yes	31	20
+2026-02-11	2026-02-18	3	Group 3	Khan	Nguyen	t6	ancB	ancW	4D	no	49	24
+2026-02-11	2026-02-18	3	Group 6	Fajarillo	Paslavsky	t6	ancB	ancW	4D	no	21	26
+2026-02-11	2026-02-18	3	Group 6	Fajarillo	Paslavsky	t6	ancB	evPop12	4D	no	58	82
+2026-02-11	2026-02-18	3	Group 6	Fajarillo	Paslavsky	t6	ancB	evPop12	4D	yes	68	88
+2026-02-11	2026-02-18	3	Group 6	Fajarillo	Paslavsky	t6	ancB	ancW	4D	yes	14	44
+2026-02-11	2026-02-18	3	Group 1	Hsu	Kanzler	t6	ancB	ancW	4D	yes	2	3
+2026-02-11	2026-02-18	3	Group 1	Hsu	Kanzler	t6	ancB	evPop1	4D	yes	79	12
+2026-02-11	2026-02-18	3	Group 1	Hsu	Kanzler	t6	ancB	evPop2	4D	yes	6	29
+2026-02-11	2026-02-18	3	Group 1	Hsu	Kanzler	t6	ancB	ancW	4D	no	76	40
+2026-02-11	2026-02-18	3	Group 1	Hsu	Kanzler	t6	ancB	evPop1	4D	no	54	31
+2026-02-11	2026-02-18	3	Group 1	Hsu	Kanzler	t6	ancB	evPop2	4D	no	44	14
+2026-02-18	2026-02-25	4	Group 3	Nguyen	Khan	t0	ancB	evPop6	4D	no	12	36
+2026-02-18	2026-02-25	4	Group 3	Nguyen	Khan	t0	ancB	ancW	4D	no	10	37
+2026-02-18	2026-02-25	4	Group 1	Hsu	Kanzler	t0	ancB	evPop1	4D	no	17	15
+2026-02-18	2026-02-25	4	Group 1	Hsu	Kanzler	t0	ancB	ancW	4D	no	58	30
+2026-02-18	2026-02-25	4	Group 6	Paslavsky	Fajarillo	t0	ancB	ancW	4D	no	5	0
+2026-02-18	2026-02-25	4	Group 6	Paslavsky	Fajarillo	t0	ancB	ancW	4D	yes	5	5
+2026-02-18	2026-02-25	4	Group 6	Paslavsky	Fajarillo	t0	ancB	evPop11	4D	no	20	14
+2026-02-18	2026-02-25	4	Group 6	Paslavsky	Fajarillo	t0	ancB	evPop11	4D	yes	4	22
+2026-02-18	2026-02-25	4	Group 6	Fajarillo	Paslavsky	t6	ancB	evPop11	4D	no	117	219
+2026-02-18	2026-02-25	4	Group 6	Paslavsky	Fajarillo	t6	ancB	evPop11	4D	yes	11	30
+2026-02-18	2026-02-25	4	Group 6	Fajarillo	Paslavsky	t6	ancB	ancW	4D	no	9	29
+2026-02-18	2026-02-25	4	Group 6	Fajarillo	Paslavsky	t6	ancB	ancW	4D	yes	13	28
+2026-02-18	2026-02-25	4	Group 1	Hsu	Kanzler	t6	ancB	evPop1	4D	yes	62	28
+2026-02-18	2026-02-25	4	Group 1	Hsu	Kanzler	t6	ancB	evPop2	4D	yes	58	23
+2026-02-18	2026-02-25	4	Group 1	Hsu	Kanzler	t6	ancB	ancW	4D	yes	35	21
+2026-02-18	2026-02-25	4	Group 1	Hsu	Kanzler	t6	ancB	evPop1	4D	no	12	14
+2026-02-18	2026-02-25	4	Group 1	Hsu	Kanzler	t6	ancB	evPop2	4D	no	59	26
+2026-02-18	2026-02-25	4	Group 1	Hsu	Kanzler	t6	ancB	ancW	4D	no	17	14
+2026-02-25	2026-03-04	5	Group 3	Khan	Nguyen	t6	ancB	evPop6	5D	yes	16	17
+2026-02-25	2026-03-04	5	Group 3	Khan	Nguyen	t6	ancB	ancW	5D	yes	28	14
+2026-02-25	2026-03-04	5	Group 3	Khan	Nguyen	t6	ancB	evPop6	5D	no	25	19
+2026-02-25	2026-03-04	5	Group 3	Khan	Nguyen	t6	ancB	ancW	5D	no	17	11
+2026-02-25	2026-03-04	5	Group 6	Fajarillo	Paslavsky	t0	ancB	evPop12	5D	no	13	31
+2026-02-25	2026-03-04	5	Group 1	Hsu	Kanzler	t0	ancB	ancW	5D	no	31	47
+2026-02-25	2026-03-04	5	Group 1	Hsu	Kanzler	t0	ancB	evPop1	5D	no	28	31
+2026-02-25	2026-03-04	5	Group 1	Hsu	Kanzler	t0	ancB	evPop2	5D	no	45	41

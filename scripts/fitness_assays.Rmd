@@ -1,0 +1,406 @@
+---
+title: "Winter 2026 B BIO 495"
+output: html_notebook
+---
+
+Fitness assay analysis
+- starting from "long data" --> pair up the correct rows (t0 with t7 for each group / strain pair / predation condition)
+- determine change in white colonies. (Blue is just a reference point.)
+
+- This is an R Notebook script -- analysis using the language R, as well as a particular type of data handling called "tidy". "Tidyverse" is a library of functions for reading in, rearranging, and plotting data.
+
+
+```{r libraries}
+library(tidyverse)
+library(tidyverse)
+library(cowplot)
+```
+
+```{r}
+# ============================================================
+# User settings
+# ============================================================
+infile = "../datafiles/fitness_assay_all.tsv"
+outdir = "../output"
+pseudocount = 0
+min_colony_count = 20   # minimum total colonies required at BOTH t0 and t6
+
+# Optional filters
+keep_blue_strain = "ancB"
+
+# Keep ancW and any white strains starting with "ev"
+keep_white_fn = function(x) {
+  x == "ancW" | stringr::str_starts(x, "ev")
+}
+
+predation_colors = c(
+  "yes" = "firebrick2",
+  "no"  = "dodgerblue2"
+)
+```
+
+Read and clean data
+```{r}
+
+dat_long =
+  readr::read_tsv(infile, show_col_types = FALSE) %>%
+  mutate(
+    num_blue_colonies  = readr::parse_number(as.character(num_blue_colonies)),
+    num_white_colonies = readr::parse_number(as.character(num_white_colonies)),
+    timepoint = as.character(timepoint),
+    timepoint = if_else(timepoint == "t7", "t6", timepoint),
+    predationYN = as.character(predationYN),
+    white_strain = gsub(pattern="evPop", replacement="ev", x=white_strain)
+  ) %>%
+  filter(
+    timepoint %in% c("t0", "t6"),
+    blue_strain == keep_blue_strain,
+    keep_white_fn(white_strain)
+  )
+
+# ============================================================
+# Check required columns
+# ============================================================
+required_cols = c(
+  "group_number",
+  "white_strain",
+  "replicate",
+  "predationYN",
+  "timepoint",
+  "num_blue_colonies",
+  "num_white_colonies",
+  "blue_strain"
+)
+
+missing_cols = setdiff(required_cols, names(dat_long))
+if (length(missing_cols) > 0) {
+  stop("Missing required column(s): ", paste(missing_cols, collapse = ", "))
+}
+
+# ============================================================
+# Pair up the t0 and t6 based on the group, white strain ID,
+# and replicate (i.e., assay date).
+# Note: one t0 row may be reused for more than one t6 row
+# ============================================================
+
+pair_keys = c("group_number", "white_strain", "replicate")
+
+dat_t0 =
+  dat_long %>%
+  filter(timepoint == "t0") %>%
+  select(
+    all_of(pair_keys),
+    blue_strain,
+    num_blue_colonies_t0  = num_blue_colonies,
+    num_white_colonies_t0 = num_white_colonies
+  ) %>%
+  distinct()
+
+dat_t6 =
+  dat_long %>%
+  filter(timepoint == "t6") %>%
+  select(
+    all_of(pair_keys),
+    blue_strain,
+    predationYN,
+    num_blue_colonies_t6  = num_blue_colonies,
+    num_white_colonies_t6 = num_white_colonies
+  )
+
+fitness_white_change =
+  dat_t6 %>%
+  left_join(
+    dat_t0,
+    by = c("group_number", "white_strain", "replicate", "blue_strain")
+  ) %>%
+  mutate(
+    total_count_t0_raw = num_blue_colonies_t0 + num_white_colonies_t0,
+    total_count_t6_raw = num_blue_colonies_t6 + num_white_colonies_t6,
+
+    has_both_timepoints =
+      !is.na(num_blue_colonies_t0) &
+      !is.na(num_white_colonies_t0) &
+      !is.na(num_blue_colonies_t6) &
+      !is.na(num_white_colonies_t6),
+
+    passes_min_colonies =
+      has_both_timepoints &
+      total_count_t0_raw >= min_colony_count &
+      total_count_t6_raw >= min_colony_count,
+
+    # Pseudocount-adjusted counts
+    blue_t0  = num_blue_colonies_t0  + pseudocount,
+    white_t0 = num_white_colonies_t0 + pseudocount,
+    blue_t6  = num_blue_colonies_t6  + pseudocount,
+    white_t6 = num_white_colonies_t6 + pseudocount,
+
+    total_t0 = blue_t0 + white_t0,
+    total_t6 = blue_t6 + white_t6,
+
+    # White frequency at each timepoint
+    pW_t0 = white_t0 / total_t0,
+    pW_t6 = white_t6 / total_t6,
+
+    # Simple change in white frequency
+    delta_pW = pW_t6 - pW_t0,
+
+    # Logit-scale change
+    delta_logit_pW = qlogis(pW_t6) - qlogis(pW_t0),
+
+    change_direction = case_when(
+      delta_pW > 0 ~ "increase",
+      delta_pW < 0 ~ "decrease",
+      TRUE ~ "no_change"
+    )
+  ) %>%
+  arrange(group_number, white_strain, predationYN, replicate)
+
+# ============================================================
+# QC output
+# ============================================================
+cat("\nRows in joined dataset:", nrow(fitness_white_change), "\n")
+cat("Rows with both timepoints:", sum(fitness_white_change$has_both_timepoints, na.rm = TRUE), "\n")
+cat("Rows passing min_colony_count filter:", sum(fitness_white_change$passes_min_colonies, na.rm = TRUE), "\n")
+
+cat("\nRows missing t0 match:\n")
+print(
+  fitness_white_change %>%
+    filter(!has_both_timepoints) %>%
+    select(group_number, white_strain, replicate, predationYN,
+           num_blue_colonies_t0, num_white_colonies_t0,
+           num_blue_colonies_t6, num_white_colonies_t6),
+  n = 50
+)
+
+cat("\nRows failing min_colony_count filter:\n")
+print(
+  fitness_white_change %>%
+    filter(has_both_timepoints, !passes_min_colonies) %>%
+    select(group_number, white_strain, replicate, predationYN,
+           total_count_t0_raw, total_count_t6_raw),
+  n = 50
+)
+```
+
+```{r}
+# ============================================================
+# Save full paired data table
+# ============================================================
+readr::write_csv(
+  fitness_white_change,
+  file.path(outdir, "white_frequency_change_t0_to_t6_by_group_predation_replicate.csv")
+)
+```
+
+```{r}
+# ============================================================
+# Analysis dataset = only rows with both timepoints and enough colonies
+# ============================================================
+analysis_df =
+  fitness_white_change %>%
+  filter(passes_min_colonies)
+
+# ============================================================
+# Summary table by white strain and predation treatment
+# ============================================================
+fitness_white_summary =
+  analysis_df %>%
+  group_by(white_strain, predationYN) %>%
+  summarise(
+    n = n(),
+    mean_pW_t0 = mean(pW_t0, na.rm = TRUE),
+    mean_pW_t6 = mean(pW_t6, na.rm = TRUE),
+    mean_delta_pW = mean(delta_pW, na.rm = TRUE),
+    sd_delta_pW = sd(delta_pW, na.rm = TRUE),
+    se_delta_pW = sd_delta_pW / sqrt(n),
+    mean_delta_logit_pW = mean(delta_logit_pW, na.rm = TRUE),
+    sd_delta_logit_pW = sd(delta_logit_pW, na.rm = TRUE),
+    se_delta_logit_pW = sd_delta_logit_pW / sqrt(n),
+    ci95_lo_delta_logit = mean_delta_logit_pW - 1.96 * se_delta_logit_pW,
+    ci95_hi_delta_logit = mean_delta_logit_pW + 1.96 * se_delta_logit_pW,
+    .groups = "drop"
+  ) %>%
+  mutate(
+    # one-sided error bars away from zero
+    err_ymin = if_else(mean_delta_logit_pW >= 0,
+                       mean_delta_logit_pW,
+                       mean_delta_logit_pW - 1.96 * se_delta_logit_pW),
+    err_ymax = if_else(mean_delta_logit_pW >= 0,
+                       mean_delta_logit_pW + 1.96 * se_delta_logit_pW,
+                       mean_delta_logit_pW)
+  ) %>%
+  arrange(white_strain, predationYN)
+
+print(fitness_white_summary, n = 100)
+
+readr::write_csv(
+  fitness_white_summary,
+  file.path(outdir, "white_strain_fitness_summary_t0_to_t6_by_predation.csv")
+)
+```
+
+
+# Plot 1: paired plot for each white_strain
+```{r} 
+plot_df =
+  analysis_df %>%
+  mutate(pair_id = row_number()) %>%
+  select(
+    pair_id,
+    group_number,
+    white_strain,
+    replicate,
+    predationYN,
+    pW_t0,
+    pW_t6,
+    change_direction
+  ) %>%
+  pivot_longer(
+    cols = c(pW_t0, pW_t6),
+    names_to = "timepoint",
+    values_to = "pW"
+  ) %>%
+  mutate(
+    timepoint = recode(
+      timepoint,
+      pW_t0 = "start",
+      pW_t6 = "end"
+    ),
+    timepoint = factor(timepoint, levels = c("start", "end")),
+    predationYN = factor(predationYN, levels = c("no", "yes"))
+  )
+
+p1 =
+  ggplot(plot_df, aes(x = timepoint, y = pW, group = pair_id, color = predationYN)) +
+  geom_line(alpha = 0.5) +
+  geom_point(size = 2, alpha=0.6) +
+  facet_wrap(~ white_strain) +
+  scale_color_manual(values = predation_colors, drop = FALSE) +
+  theme_classic() +
+  labs(
+    x = NULL,
+    y = "White strain frequency",
+    color = "Predation",
+    title = "Change in white strain frequency from start to end"
+  )
+
+print(p1)
+
+
+ggsave(
+  filename = file.path(outdir, "paired_white_frequency_by_white_strain.pdf"),
+  plot = p1,
+  width = 10,
+  height = 7
+)
+```
+
+```{r}
+# without predation
+p_noPred = ggplot(data=fitness_white_change %>% filter(predationYN=="no"), aes(x=white_strain, y=delta_pW)) +
+  geom_boxplot(aes(x=white_strain, fill=predationYN), alpha=0.5, outlier.shape=NA) +
+  geom_jitter(width=0.1, alpha=0.6) + 
+  geom_hline(yintercept=0, lty=2) +
+  #scale_color_manual(values=predation_colors) +
+  scale_fill_manual(values=predation_colors) +
+  ylab("Change in White Strain Frequency") +
+  theme_cowplot() +ylim(-1,1)
+
+
+# with predation
+p_wPred = ggplot(data=fitness_white_change %>% filter(predationYN=="yes"), aes(x=white_strain, y=delta_pW)) +
+  geom_boxplot(aes(x=white_strain, fill=predationYN), alpha=0.5, outlier.shape=NA) +
+  geom_jitter(width=0.1, alpha=0.6) + 
+  geom_hline(yintercept=0, lty=2) +
+  #scale_color_manual(values=predation_colors) +
+  scale_fill_manual(values=predation_colors) +
+  ylab("Change in White Strain Frequency") +
+  theme_cowplot() +ylim(-1,1)
+
+plot_grid(p_noPred, p_wPred, ncol=1)
+
+
+```
+
+
+# Plot 2: paired plot separated by predation treatment
+```{r}
+
+p2 =
+  ggplot(plot_df, aes(x = timepoint, y = pW, group = pair_id, color = predationYN)) +
+  geom_line(alpha = 0.5) +
+  geom_point(size = 2, alpha=0.7) +
+  facet_grid(predationYN ~ white_strain) +
+  scale_color_manual(values = predation_colors, drop = FALSE) +
+  theme_classic() +
+  labs(
+    x = NULL,
+    y = "White strain frequency",
+    color = "Predation",
+    title = "Change in white strain frequency from start to end by predation treatment"
+  )
+
+print(p2)
+
+ggsave(
+  filename = file.path(outdir, "paired_white_frequency_by_white_strain_and_predation.pdf"),
+  plot = p2,
+  width = 12,
+  height = 8
+)
+```
+
+# Plot 3: summary plot of mean delta_logit_pW
+# one-sided error bars away from zero
+
+```{r} 
+fitness_white_summary =
+  fitness_white_summary %>%
+  mutate(predationYN = factor(predationYN, levels = c("no", "yes")))
+
+p3 =
+  ggplot(fitness_white_summary,
+         aes(x = white_strain, y = mean_delta_pW, fill = predationYN)) +
+  geom_col(position = position_dodge(width = 0.8), width = 0.7) +
+  geom_errorbar(aes(ymin = mean_delta_pW+se_delta_pW, ymax = mean_delta_pW-se_delta_pW),
+    position = position_dodge(width = 0.8),width = 0.2) +
+  scale_fill_manual(values = predation_colors, drop = FALSE) +
+  theme_classic() +
+  labs(
+    x = "White strain",
+    y = "Mean change in logit(pW)",
+    fill = "Predation",
+    title = "Mean competitive change in white strain frequency"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) + geom_hline(yintercept=0, lty=2)
+
+print(p3)
+
+ggsave(
+  filename = file.path(outdir, "summary_delta_logit_pW_by_white_strain_and_predation.pdf"),
+  plot = p3,
+  width = 10,
+  height = 6
+)
+```
+
+# QC table showing how many joined rows per t0 pairing group
+```{r}
+
+pairing_qc =
+  fitness_white_change %>%
+  count(group_number, white_strain, replicate, name = "n_joined_rows") %>%
+  arrange(desc(n_joined_rows), group_number, white_strain, replicate)
+
+print(pairing_qc, n = 100)
+
+readr::write_csv(
+  pairing_qc,
+  file.path(outdir, "pairing_qc_counts.csv")
+)
+
+
+```
+
