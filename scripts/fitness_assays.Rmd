@@ -58,6 +58,14 @@ dat_long =
     keep_white_fn(white_strain)
   )
 
+
+dat_long <- dat_long %>%
+  mutate(
+    strain_num = ifelse(white_strain == "ancW", 0,
+                        as.numeric(sub("ev", "", white_strain))),
+    white_strain = factor(white_strain,
+                          levels = unique(white_strain[order(strain_num)]))
+  )
 # ============================================================
 # Check required columns
 # ============================================================
@@ -270,6 +278,9 @@ plot_df =
     predationYN = factor(predationYN, levels = c("no", "yes"))
   )
 
+# reorder the levels of white_strain
+plot_df$white_strain <- factor(plot_df$white_strain, levels = c("ancW", paste0("ev", 1:12)))
+
 p1 =
   ggplot(plot_df, aes(x = timepoint, y = pW, group = pair_id, color = predationYN)) +
   geom_line(alpha = 0.5) +
@@ -303,8 +314,8 @@ p_noPred = ggplot(data=fitness_white_change %>% filter(predationYN=="no"), aes(x
   geom_hline(yintercept=0, lty=2) +
   #scale_color_manual(values=predation_colors) +
   scale_fill_manual(values=predation_colors) +
-  ylab("Change in White Strain Frequency") +
-  theme_cowplot() +ylim(-1,1)
+  ylab("Change in Frequency") +
+  theme_cowplot() +ylim(-1,1) + xlab("White Strain") + ggtitle("No Predation")
 
 
 # with predation
@@ -314,10 +325,12 @@ p_wPred = ggplot(data=fitness_white_change %>% filter(predationYN=="yes"), aes(x
   geom_hline(yintercept=0, lty=2) +
   #scale_color_manual(values=predation_colors) +
   scale_fill_manual(values=predation_colors) +
-  ylab("Change in White Strain Frequency") +
-  theme_cowplot() +ylim(-1,1)
+  ylab("Change in Frequency") +
+  theme_cowplot() +ylim(-1,1) + xlab("White Strain") + ggtitle("With Amoebal Predation")
 
-plot_grid(p_noPred, p_wPred, ncol=1)
+p_all=plot_grid(p_noPred, p_wPred, ncol=1)
+
+save_plot("../output/with_vs_without_predation.pdf", p_all, base_height = 8, base_width=8)
 
 
 ```
@@ -356,8 +369,7 @@ ggsave(
 ```{r} 
 fitness_white_summary =
   fitness_white_summary %>%
-  mutate(predationYN = factor(predationYN, levels = c("no", "yes")))
-
+  mutate(predationYN = factor(predationYN, levels = c("no", "yes"))) 
 p3 =
   ggplot(fitness_white_summary,
          aes(x = white_strain, y = mean_delta_pW, fill = predationYN)) +
