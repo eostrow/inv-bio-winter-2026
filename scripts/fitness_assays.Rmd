@@ -4,7 +4,7 @@ output: html_notebook
 ---
 
 Fitness assay analysis
-- starting from "long data" --> pair up the correct rows (t0 with t7 for each group / strain pair / predation condition)
+- starting from "long data" --> pair up the correct rows (t0 with t6 for each group / strain pair / predation condition)
 - determine change in white colonies. (Blue is just a reference point.)
 
 - This is an R Notebook script -- analysis using the language R, as well as a particular type of data handling called "tidy". "Tidyverse" is a library of functions for reading in, rearranging, and plotting data.
@@ -42,6 +42,9 @@ predation_colors = c(
 Read and clean data
 ```{r}
 
+# Order strains by their phenotype (for plotting later):
+desired_order <- c("ancW", paste0("ev", c(10,2,12,4,7,8,6,11,9,1,3,5)))
+
 dat_long =
   readr::read_tsv(infile, show_col_types = FALSE) %>%
   mutate(
@@ -65,6 +68,12 @@ dat_long <- dat_long %>%
                         as.numeric(sub("ev", "", white_strain))),
     white_strain = factor(white_strain,
                           levels = unique(white_strain[order(strain_num)]))
+  )
+
+# Reorder evolved isolates by their morphology
+dat_long <- dat_long %>%
+  mutate(
+    white_strain = factor(white_strain, levels = desired_order)
   )
 # ============================================================
 # Check required columns
@@ -247,6 +256,110 @@ readr::write_csv(
 )
 ```
 
+# Statistical tests
+```{r stats_setup}
+library(emmeans)
+library(broom)
+
+sig_label = function(p) {
+  dplyr::case_when(
+    is.na(p)      ~ NA_character_,
+    p < 0.001     ~ "***",
+    p < 0.01      ~ "**",
+    p < 0.05      ~ "*",
+    TRUE          ~ "ns"
+  )
+}
+```
+
+```{r stats_vs_zero}
+# ============================================================
+# One-sample tests: is delta_pW different from 0?
+# Only run tests for groups with at least 2 non-missing values
+# ============================================================
+vs0_stats =
+  analysis_df %>%
+  group_by(predationYN, white_strain) %>%
+  summarise(
+    n = sum(!is.na(delta_pW)),
+    mean_delta_pW = mean(delta_pW, na.rm = TRUE),
+    t_test = list(
+      if (n >= 2) {
+        broom::tidy(t.test(delta_pW, mu = 0))
+      } else {
+        tibble(
+          estimate = mean(delta_pW, na.rm = TRUE),
+          statistic = NA_real_,
+          p.value = NA_real_,
+          conf.low = NA_real_,
+          conf.high = NA_real_,
+          method = NA_character_
+        )
+      }
+    ),
+    .groups = "drop"
+  ) %>%
+  tidyr::unnest(t_test) %>%
+  mutate(
+    p_adj_BH = p.adjust(p.value, method = "BH"),
+    sig_vs0 = sig_label(p_adj_BH)
+  ) %>%
+  arrange(predationYN, white_strain)
+
+print(vs0_stats, n = 100)
+
+readr::write_csv(
+  vs0_stats,
+  file.path(outdir, "stats_vs_zero_by_white_strain_and_predation.csv")
+)
+```
+
+```{r stats_vs_ancW}
+# ============================================================
+# Compare each white strain against ancW within each predation
+# treatment. Only groups present in analysis_df are included.
+# ============================================================
+analysis_df_for_model =
+  analysis_df %>%
+  droplevels() %>%
+  mutate(
+    predationYN = factor(predationYN),
+    white_strain = stats::relevel(factor(white_strain), ref = "ancW")
+  )
+
+fit_ancW = lm(delta_pW ~ predationYN * white_strain, data = analysis_df_for_model)
+
+vs_ancW_stats =
+  emmeans(fit_ancW, ~ white_strain | predationYN) %>%
+  contrast(method = "trt.vs.ctrl1", ref = 1, adjust = "none") %>%
+  summary(infer = TRUE) %>%
+  as.data.frame() %>%
+  transmute(
+    predationYN,
+    contrast,
+    white_strain = stringr::str_remove(contrast, " - ancW"),
+    estimate,
+    std.error = SE,
+    df,
+    t_ratio = t.ratio,
+    p_value = p.value
+  ) %>%
+  group_by(predationYN) %>%
+  mutate(
+    p_adj_BH = p.adjust(p_value, method = "BH"),
+    sig_vs_ancW = sig_label(p_adj_BH)
+  ) %>%
+  ungroup() %>%
+  arrange(predationYN, white_strain)
+
+print(vs_ancW_stats, n = 100)
+
+readr::write_csv(
+  vs_ancW_stats,
+  file.path(outdir, "stats_vs_ancW_by_predation.csv")
+)
+```
+
 
 # Plot 1: paired plot for each white_strain
 ```{r} 
@@ -306,32 +419,41 @@ ggsave(
 )
 ```
 
+Plot 2: just plot whether white strain increased or decreased
+Separate predation vs not
+Order: anc, wrinklies, fuzzy (ev1), mucoid (ev3)
 ```{r}
 # without predation
-p_noPred = ggplot(data=fitness_white_change %>% filter(predationYN=="no"), aes(x=white_strain, y=delta_pW)) +
+p_noPred = ggplot(data=fitness_white_change %>% filter(predationYN=="no"), aes(x = factor(white_strain,
+                               levels = c("ancW", "ev10", "ev2", "ev4", "ev5", "ev6", "ev7", "ev9", "ev11", "ev12", "ev1", "ev3")), y=delta_pW)) +
   geom_boxplot(aes(x=white_strain, fill=predationYN), alpha=0.5, outlier.shape=NA) +
   geom_jitter(width=0.1, alpha=0.6) + 
   geom_hline(yintercept=0, lty=2) +
   #scale_color_manual(values=predation_colors) +
   scale_fill_manual(values=predation_colors) +
   ylab("Change in Frequency") +
-  theme_cowplot() +ylim(-1,1) + xlab("White Strain") + ggtitle("No Predation")
+  theme_cowplot() +ylim(-1,1) + xlab("White Strain") + 
+  ggtitle("Without Predation") + 
+  theme(legend.position = "none") 
 
 
 # with predation
-p_wPred = ggplot(data=fitness_white_change %>% filter(predationYN=="yes"), aes(x=white_strain, y=delta_pW)) +
+p_wPred = ggplot(data=fitness_white_change %>% filter(predationYN=="yes"), aes(x = factor(white_strain,
+                               levels = c("ancW",  "ev10", "ev2", "ev4", "ev5", "ev6", "ev7", "ev9", "ev11", "ev12", "ev1", "ev3")), y=delta_pW)) +
   geom_boxplot(aes(x=white_strain, fill=predationYN), alpha=0.5, outlier.shape=NA) +
   geom_jitter(width=0.1, alpha=0.6) + 
   geom_hline(yintercept=0, lty=2) +
   #scale_color_manual(values=predation_colors) +
   scale_fill_manual(values=predation_colors) +
   ylab("Change in Frequency") +
-  theme_cowplot() +ylim(-1,1) + xlab("White Strain") + ggtitle("With Amoebal Predation")
+  theme_cowplot() +ylim(-1,1) + xlab("White Strain") + ggtitle("With Amoebal Predation") + 
+  theme(legend.position = "none") 
 
-p_all=plot_grid(p_noPred, p_wPred, ncol=1)
+p_all=plot_grid(p_noPred, p_wPred, ncol=2)
 
-save_plot("../output/with_vs_without_predation.pdf", p_all, base_height = 8, base_width=8)
+save_plot("../output/with_vs_without_predation.pdf", p_all, base_height = 5, base_width=12)
 
+p_all
 
 ```
 
